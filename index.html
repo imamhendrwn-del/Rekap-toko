@@ -68,9 +68,9 @@ th,td{padding:9px 6px;text-align:left;border-bottom:1px solid var(--bd);white-sp
  <div class="card"><div class="sc"><table style="min-width:360px"><thead><tr><th>Produk</th><th class="r">Stok</th><th class="r">Modal</th><th></th></tr></thead><tbody id="stb"></tbody></table></div></div></div>
 <div class="sec" id="k"><div class="card"><h2>Toko</h2>
  <div class="f"><div><label>Nama toko</label><input id="kn" placeholder="mis. Perdiess Shopee"></div><div><label>Platform</label><select id="kp"><option>Shopee</option><option>Tokopedia</option><option>TikTok Shop</option><option>Instagram/WA</option><option>Lainnya</option></select></div>
- <div style="grid-column:1/-1"><button class="p" id="ka" style="width:100%">Tambah Toko</button></div></div><div id="kl" style="margin-top:8px"></div></div>
+ <div style="grid-column:1/-1"><label>Admin default (%) — bisa diubah tiap transaksi</label><input type="number" id="kd" step="0.1" placeholder="mis. 8"></div><div style="grid-column:1/-1"><button class="p" id="ka" style="width:100%">Tambah Toko</button></div></div><div id="kl" style="margin-top:8px"></div></div>
  <div class="card"><h2>Sinkron Google Sheets</h2><label>URL Web App (Apps Script)</label><input id="su" placeholder="https://script.google.com/macros/s/.../exec">
- <div class="f" style="margin-top:10px"><button id="sus">Simpan URL</button><button id="sua">Kirim ulang semua</button></div><div class="em" id="sx"></div></div></div>
+ <div class="f" style="margin-top:10px"><button id="sus">Simpan URL</button><button id="sua">Sinkron sekarang</button></div><div class="em" id="sx"></div></div></div>
 </div>
 
 <datalist id="dl"></datalist>
@@ -78,7 +78,7 @@ th,td{padding:9px 6px;text-align:left;border-bottom:1px solid var(--bd);white-sp
  <div class="f"><div><label>Tanggal</label><input type="date" id="tgl"></div><div><label>Toko</label><select id="plt"></select></div>
  <div style="grid-column:1/-1"><label>Produk</label><input id="prd" list="dl" placeholder="Nama produk"></div>
  <div><label>Qty</label><input type="number" id="qty" value="1" min="1"></div><div><label>Harga jual / pcs</label><input type="number" id="hj"></div>
- <div><label>Modal / pcs</label><input type="number" id="hm"></div><div><label>Admin & ongkir</label><input type="number" id="bya"></div>
+ <div><label>Modal / pcs</label><input type="number" id="hm"></div><div><label>Admin platform (%)</label><input type="number" id="adm" step="0.1" placeholder="0"></div><div><label>Ongkir ditanggung (Rp)</label><input type="number" id="ong" placeholder="0"></div><div id="pv" class="mu sm" style="grid-column:1/-1"></div>
  <div style="grid-column:1/-1"><button class="p" id="add" style="width:100%">Simpan</button></div></div></div></div>
 
 <script>
@@ -86,7 +86,8 @@ const $=i=>document.getElementById(i),rp=n=>"Rp"+Math.round(n).toLocaleString("i
 const pad=n=>String(n).padStart(2,"0"),ds=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const ld=k=>{try{return JSON.parse(localStorage.getItem(k)||"[]")}catch(e){return[]}};
 let data=ld("rekap_toko"),stok=ld("rekap_stok"),toko=ld("rekap_toko_list"),mode="d",cur="",SU="";try{SU=localStorage.getItem("rekap_sheet_url")||""}catch(e){}
-const sv=()=>{try{localStorage.setItem("rekap_toko",JSON.stringify(data));localStorage.setItem("rekap_stok",JSON.stringify(stok));localStorage.setItem("rekap_toko_list",JSON.stringify(toko))}catch(e){}};
+const lsave=()=>{try{localStorage.setItem("rekap_toko",JSON.stringify(data));localStorage.setItem("rekap_stok",JSON.stringify(stok));localStorage.setItem("rekap_toko_list",JSON.stringify(toko))}catch(e){}};
+const sv=()=>{lsave();send({stok,toko})};
 const om=t=>t.qty*t.hj,lb=t=>t.qty*(t.hj-t.hm)-t.bya;
 const D=()=>cur?data.filter(t=>t.toko===cur):data;const sum=(a,b,f)=>D().filter(t=>t.tgl>=a&&t.tgl<b).reduce((s,t)=>s+f(t),0);
 const T=new Date();T.setHours(0,0,0,0);
@@ -134,19 +135,19 @@ function R(){
  const ops=toko.map(k=>`<option value="${esc(k.n)}">${esc(k.n)}</option>`).join("");
  $("ct").innerHTML='<option value="">Semua toko</option>'+ops;$("ct").value=cur;
  $("plt").innerHTML=ops||'<option value="">(tambah toko dulu)</option>';
- $("kl").innerHTML=toko.length?toko.map((k,i)=>`<div class="row"><span>${esc(k.n)} <span class="bd">${k.p}</span></span><button class="x" data-i="${i}">×</button></div>`).join(""):'<div class="em">Belum ada toko</div>'}
+ $("kl").innerHTML=toko.length?toko.map((k,i)=>`<div class="row"><span>${esc(k.n)} <span class="bd">${k.p} · admin ${k.a||0}%</span></span><button class="x" data-i="${i}">×</button></div>`).join(""):'<div class="em">Belum ada toko</div>'}
 
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("on",x==b));document.querySelectorAll(".sec").forEach(s=>s.classList.toggle("on",s.id==b.dataset.t))});
 document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{mode=b.dataset.m;document.querySelectorAll("#seg button").forEach(x=>x.classList.toggle("on",x==b));chart()});
-$("new").onclick=()=>{$("tgl").value=ds(T);$("mod").style.display="block"};
+$("new").onclick=()=>{$("tgl").value=ds(T);$("mod").style.display="block";if(cur)$("plt").value=cur;fillAdm()};
 $("cl").onclick=()=>$("mod").style.display="none";
 $("prd").onchange=()=>{const s=fs($("prd").value);if(s&&s.m&&!$("hm").value)$("hm").value=s.m};
 $("add").onclick=()=>{const prd=$("prd").value.trim(),qty=+$("qty").value,hj=+$("hj").value;
  if(!prd||!qty||!hj||!$("tgl").value||!$("plt").value){alert("Isi toko, tanggal, produk, qty, dan harga jual.");return}
- data.push({id:Date.now(),tgl:$("tgl").value,prd,toko:$("plt").value,plt:(toko.find(k=>k.n===$("plt").value)||{}).p||"",qty,hj,hm:+$("hm").value||0,bya:+$("bya").value||0});
+ const fee=Math.round(qty*hj*(+$("adm").value||0)/100)+(+$("ong").value||0);data.push({id:Date.now(),tgl:$("tgl").value,prd,toko:$("plt").value,plt:(toko.find(k=>k.n===$("plt").value)||{}).p||"",qty,hj,hm:+$("hm").value||0,bya:fee,adm:+$("adm").value||0,ong:+$("ong").value||0});
  const s=fs(prd);if(s)s.q=Math.max(0,s.q-qty);
- post([row(data[data.length-1])]);sv();["prd","hj","hm","bya"].forEach(i=>$(i).value="");$("qty").value=1;$("mod").style.display="none";R()};
-$("tb").onclick=e=>{const id=e.target.dataset.id;if(id&&confirm("Hapus transaksi ini?")){data=data.filter(d=>d.id!=id);sv();R()}};
+ post([row(data[data.length-1])]);sv();["prd","hj","hm","ong"].forEach(i=>$(i).value="");$("qty").value=1;$("mod").style.display="none";R()};
+$("tb").onclick=e=>{const id=e.target.dataset.id;if(id&&confirm("Hapus transaksi ini?")){data=data.filter(d=>d.id!=id);send({del:+id});sv();R()}};
 $("sa").onclick=()=>{const n=$("sp").value.trim();if(!n||$("sq").value===""){alert("Isi nama produk dan stok.");return}
  const s=fs(n),q=+$("sq").value,m=+$("sm").value||0;if(s){s.q=q;if(m)s.m=m}else stok.push({n,q,m});
  sv();["sp","sq","sm"].forEach(i=>$(i).value="");R()};
@@ -154,12 +155,26 @@ $("stb").onclick=e=>{const i=e.target.dataset.i;if(i!==undefined&&confirm("Hapus
 $("csv").onclick=()=>{const r=[["Tanggal","Produk","Platform","Qty","Harga Jual","Modal","Biaya","Laba"],...data.map(t=>[t.tgl,'"'+t.prd.replace(/"/g,'""')+'"',t.plt,t.qty,t.hj,t.hm,t.bya,lb(t)])];
  const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(r.map(x=>x.join(",")).join("\n"));a.download="rekap-toko.csv";a.click()};
 $("ct").onchange=()=>{cur=$("ct").value;R()};
-$("ka").onclick=()=>{const n=$("kn").value.trim();if(!n)return;if(toko.some(k=>k.n.toLowerCase()===n.toLowerCase())){alert("Nama toko sudah ada.");return}toko.push({n,p:$("kp").value});sv();$("kn").value="";R()};
+$("ka").onclick=()=>{const n=$("kn").value.trim();if(!n)return;const ex=toko.find(k=>k.n.toLowerCase()===n.toLowerCase());if(ex){ex.p=$("kp").value;ex.a=+$("kd").value||0}else toko.push({n,p:$("kp").value,a:+$("kd").value||0});sv();$("kn").value="";$("kd").value="";R()};
 $("kl").onclick=e=>{const i=e.target.dataset.i;if(i!==undefined&&confirm("Hapus toko? Transaksi lama tetap tersimpan.")){if(cur===toko[i].n)cur="";toko.splice(i,1);sv();R()}};
 const row=t=>[t.id,t.tgl,t.toko||"",t.plt,t.prd,t.qty,t.hj,t.hm,t.bya,om(t),lb(t)];
+const send=async o=>{if(!SU)return;try{await fetch(SU,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify(o)})}catch(e){}};
 const post=async rows=>{if(!SU)return"Isi URL Web App dulu.";try{await fetch(SU,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({rows})});return"Terkirim "+rows.length+" baris. Cek sheet-nya."}catch(e){return"Gagal kirim: "+e.message}};
 $("sus").onclick=()=>{SU=$("su").value.trim();try{localStorage.setItem("rekap_sheet_url",SU)}catch(e){}$("sx").textContent=SU?"URL tersimpan.":"URL dikosongkan."};
-$("sua").onclick=async()=>{$("sx").textContent="Mengirim...";$("sx").textContent=await post(data.map(row))};
+$("sua").onclick=async()=>{$("sx").textContent="Menyinkron...";$("sx").textContent=await pull()};
+function fillAdm(){const k=toko.find(x=>x.n===$("plt").value);$("adm").value=k&&k.a?k.a:"";pv()}
+function pv(){const q=+$("qty").value||0,h=+$("hj").value||0,m=+$("hm").value||0,a=+$("adm").value||0,o=+$("ong").value||0,f=Math.round(q*h*a/100)+o,l=q*(h-m)-f;$("pv").innerHTML=`Biaya admin+ongkir ${rp(f)} · Laba <b class="${l>=0?"up":"dn"}">${rp(l)}</b>`}
+$("plt").onchange=fillAdm;["qty","hj","hm","adm","ong"].forEach(i=>$(i).oninput=pv);
+async function pull(){
+ if(!SU)return"Isi URL Web App dulu.";
+ try{const j=await(await fetch(SU)).json();
+  const rid=new Set(j.tx.map(t=>t.id)),pend=data.filter(t=>!t.s&&!rid.has(t.id));
+  data=[...j.tx.map(t=>({...t,s:1})),...pend];
+  if(pend.length)send({rows:pend.map(row)});
+  if(j.stok.length||!stok.length)stok=j.stok;else send({stok});
+  if(j.toko.length||!toko.length)toko=j.toko;else send({toko});
+  lsave();R();return"Tersinkron: "+data.length+" transaksi, "+stok.length+" produk, "+toko.length+" toko."
+ }catch(e){return"Gagal ambil data (cek script sudah versi baru): "+e.message}}
 $("su").value=SU;
-R();
+R();pull();document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull()});
 </script></body></html>
