@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rekap Toko Online</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark;--bg:#050607;--card:#0e1115;--bd:#1c222b;--tx:#eef1f5;--mu:#7d8794;--g:#39ff14;--r:#ff2a55;--b:#38bdf8}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:960px;margin:0 auto;padding:14px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+h1{font-size:18px;margin:0}h1 b{color:var(--g);text-shadow:0 0 10px var(--g)}
+h2{font-size:14px;margin:0 0 10px;color:var(--mu);font-weight:600}
+.nav{display:flex;gap:6px;margin-bottom:12px}
+button{font:inherit;font-weight:600;font-size:13px;padding:9px 14px;border-radius:9px;border:1px solid var(--bd);background:var(--card);color:var(--mu);cursor:pointer}
+button.on{color:#000;background:var(--g);border-color:var(--g);box-shadow:0 0 14px #39ff1466}
+button.p{color:#000;background:var(--g);border-color:var(--g);box-shadow:0 0 14px #39ff1466}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+.g4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.g4 .card{margin:0}
+.l{font-size:12px;color:var(--mu)}.v{font-size:20px;font-weight:800;margin:4px 0 2px}
+.up{color:var(--g);text-shadow:0 0 8px var(--g)}.dn{color:var(--r);text-shadow:0 0 8px var(--r)}.mu{color:var(--mu)}
+.sm{font-size:12px}
+.cols{display:grid;gap:12px}
+@media(min-width:760px){.g4{grid-template-columns:repeat(4,1fr)}.cols{grid-template-columns:2fr 1fr}}
+.seg{display:flex;gap:6px;margin-bottom:8px}.seg button{padding:6px 10px;font-size:12px}
+.top select{width:auto}
+svg{width:100%;height:auto;display:block}
+.ft{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--bd);margin-top:8px;padding-top:10px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd);gap:8px}
+.row:last-child{border:0}
+.bd{font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--bd);color:var(--mu)}
+label{display:block;font-size:12px;color:var(--mu);margin-bottom:3px}
+input,select{width:100%;padding:10px;border:1px solid var(--bd);border-radius:9px;background:#000;color:var(--tx);font:inherit}
+input:focus,select:focus{outline:0;border-color:var(--g)}
+.f{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sc{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px;min-width:480px}
+th,td{padding:9px 6px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}th{color:var(--mu);font-weight:500}.r{text-align:right}
+.x{padding:2px 9px;color:var(--r);border:0;background:none;font-size:18px}
+.sec{display:none}.sec.on{display:block}
+#mod{display:none;position:fixed;inset:0;background:#000c;z-index:9;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px));overflow:auto}
+#mod .card{max-width:520px;margin:0 auto}
+.em{color:var(--mu);text-align:center;padding:14px;font-size:13px}
+</style></head><body><div class="w">
+<div class="top"><h1>Rekap <b>Toko</b></h1><div style="display:flex;gap:6px"><select id="ct" style="width:auto"></select><button class="p" id="new">+ Transaksi</button></div></div>
+<div class="nav"><button class="on" data-t="d">Dashboard</button><button data-t="t">Transaksi</button><button data-t="s">Stok</button><button data-t="k">Toko & Sheet</button></div>
+
+<div class="sec on" id="d">
+ <div class="g4" id="st"></div>
+ <div class="cols">
+  <div class="card"><h2>Grafik Penjualan</h2>
+   <div class="seg" id="seg"><button class="on" data-m="d">Harian</button><button data-m="w">Mingguan</button><button data-m="m">Bulanan</button></div>
+   <div id="ch"></div>
+   <div class="ft"><div><div class="l">Omzet</div><b id="fo"></b></div><div style="text-align:right"><div class="l">Laba Bersih</div><b id="fl"></b></div></div>
+  </div>
+  <div><div class="card"><h2>Status Stok</h2><div id="ss"></div></div>
+  <div class="card"><h2>Terlaris Bulan Ini</h2><div id="tp"></div></div></div>
+ </div>
+ <div class="card"><h2>Transaksi Terbaru</h2><div id="rc"></div></div>
+</div>
+
+<div class="sec" id="t"><div class="card">
+ <div class="top"><h2 style="margin:0">Semua Transaksi</h2><button id="csv">Export CSV</button></div>
+ <div class="sc"><table><thead><tr><th>Tgl</th><th>Produk</th><th>Toko</th><th class="r">Qty</th><th class="r">Omzet</th><th class="r">Laba</th><th></th></tr></thead><tbody id="tb"></tbody></table></div></div></div>
+
+<div class="sec" id="s"><div class="card"><h2>Tambah / Update Stok</h2>
+ <div class="f"><div><label>Produk</label><input id="sp" list="dl" placeholder="Nama produk"></div><div><label>Stok</label><input type="number" id="sq" min="0"></div>
+ <div><label>Modal / pcs</label><input type="number" id="sm"></div><div style="display:flex;align-items:end"><button class="p" id="sa" style="width:100%">Simpan</button></div></div></div>
+ <div class="card"><div class="sc"><table style="min-width:360px"><thead><tr><th>Produk</th><th class="r">Stok</th><th class="r">Modal</th><th></th></tr></thead><tbody id="stb"></tbody></table></div></div></div>
+<div class="sec" id="k"><div class="card"><h2>Toko</h2>
+ <div class="f"><div><label>Nama toko</label><input id="kn" placeholder="mis. Perdiess Shopee"></div><div><label>Platform</label><select id="kp"><option>Shopee</option><option>Tokopedia</option><option>TikTok Shop</option><option>Instagram/WA</option><option>Lainnya</option></select></div>
+ <div style="grid-column:1/-1"><button class="p" id="ka" style="width:100%">Tambah Toko</button></div></div><div id="kl" style="margin-top:8px"></div></div>
+ <div class="card"><h2>Sinkron Google Sheets</h2><label>URL Web App (Apps Script)</label><input id="su" placeholder="https://script.google.com/macros/s/.../exec">
+ <div class="f" style="margin-top:10px"><button id="sus">Simpan URL</button><button id="sua">Kirim ulang semua</button></div><div class="em" id="sx"></div></div></div>
+</div>
+
+<datalist id="dl"></datalist>
+<div id="mod"><div class="card"><div class="top"><h2 style="margin:0">Transaksi Baru</h2><button id="cl">Tutup</button></div>
+ <div class="f"><div><label>Tanggal</label><input type="date" id="tgl"></div><div><label>Toko</label><select id="plt"></select></div>
+ <div style="grid-column:1/-1"><label>Produk</label><input id="prd" list="dl" placeholder="Nama produk"></div>
+ <div><label>Qty</label><input type="number" id="qty" value="1" min="1"></div><div><label>Harga jual / pcs</label><input type="number" id="hj"></div>
+ <div><label>Modal / pcs</label><input type="number" id="hm"></div><div><label>Admin & ongkir</label><input type="number" id="bya"></div>
+ <div style="grid-column:1/-1"><button class="p" id="add" style="width:100%">Simpan</button></div></div></div></div>
+
+<script>
+const $=i=>document.getElementById(i),rp=n=>"Rp"+Math.round(n).toLocaleString("id-ID"),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad=n=>String(n).padStart(2,"0"),ds=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const ld=k=>{try{return JSON.parse(localStorage.getItem(k)||"[]")}catch(e){return[]}};
+let data=ld("rekap_toko"),stok=ld("rekap_stok"),toko=ld("rekap_toko_list"),mode="d",cur="",SU="";try{SU=localStorage.getItem("rekap_sheet_url")||""}catch(e){}
+const sv=()=>{try{localStorage.setItem("rekap_toko",JSON.stringify(data));localStorage.setItem("rekap_stok",JSON.stringify(stok));localStorage.setItem("rekap_toko_list",JSON.stringify(toko))}catch(e){}};
+const om=t=>t.qty*t.hj,lb=t=>t.qty*(t.hj-t.hm)-t.bya;
+const D=()=>cur?data.filter(t=>t.toko===cur):data;const sum=(a,b,f)=>D().filter(t=>t.tgl>=a&&t.tgl<b).reduce((s,t)=>s+f(t),0);
+const T=new Date();T.setHours(0,0,0,0);
+const ad=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const Y=T.getFullYear(),M=T.getMonth(),mo=n=>ds(new Date(Y,M+n,1));
+const fs=n=>stok.find(s=>s.n.toLowerCase()===n.trim().toLowerCase());
+const dl=(c,p,u)=>{if(!p)return c>0?`<span class="up sm">▲ baru</span>`:`<span class="mu sm">–</span>`;const x=(c-p)/Math.abs(p)*100;return`<span class="${x>=0?"up":"dn"} sm">${x>=0?"▲":"▼"} ${Math.abs(x).toFixed(0)}% ${u}</span>`};
+const cd=(l,v,s,c="")=>`<div class="card"><div class="l">${l}</div><div class="v ${c}">${v}</div>${s}</div>`;
+
+function buckets(){const o=[];
+ if(mode=="d")for(let i=6;i>=0;i--){const a=ad(T,-i);o.push([ds(a),ds(ad(a,1)),a.getDate()+"/"+(a.getMonth()+1)])}
+ else if(mode=="w"){const m=ad(T,-((T.getDay()+6)%7));for(let i=7;i>=0;i--){const a=ad(m,-7*i);o.push([ds(a),ds(ad(a,7)),a.getDate()+"/"+(a.getMonth()+1)])}}
+ else for(let i=5;i>=0;i--){const a=new Date(Y,M-i,1);o.push([ds(a),ds(new Date(Y,M-i+1,1)),a.toLocaleDateString("id-ID",{month:"short"})])}
+ return o}
+
+function chart(){const B=buckets(),v=B.map(b=>sum(b[0],b[1],om)),mx=Math.max(...v);
+ $("fo").textContent=rp(v.reduce((a,b)=>a+b,0));
+ const L=B.reduce((s,b)=>s+sum(b[0],b[1],lb),0);$("fl").textContent=rp(L);$("fl").className=L>=0?"up":"dn";
+ if(!mx){$("ch").innerHTML='<div class="em">Belum ada penjualan di periode ini</div>';return}
+ const n=v.length,X=i=>24+i*(552/(n-1)),Yy=x=>165-x/mx*140;let s='<svg viewBox="0 0 600 205"><defs><filter id="gl" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+ [0,.5,1].forEach(k=>s+=`<line x1="24" x2="576" y1="${Yy(mx*k)}" y2="${Yy(mx*k)}" stroke="#1c222b"/>`);
+ s+=`<text x="24" y="${Yy(mx)-6}" fill="#7d8794" font-size="11">${rp(mx)}</text><g filter="url(#gl)">`;
+ for(let i=1;i<n;i++){const c=v[i]>=v[i-1]?"#39ff14":"#ff2a55";s+=`<line x1="${X(i-1)}" y1="${Yy(v[i-1])}" x2="${X(i)}" y2="${Yy(v[i])}" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`}
+ v.forEach((x,i)=>{const c=i==0||x>=v[i-1]?"#39ff14":"#ff2a55";s+=`<circle cx="${X(i)}" cy="${Yy(x)}" r="4.5" fill="${c}"/>`});
+ s+="</g>";B.forEach((b,i)=>s+=`<text x="${X(i)}" y="195" fill="#7d8794" font-size="11" text-anchor="middle">${b[2]}</text>`);
+ $("ch").innerHTML=s+"</svg>"}
+
+function R(){
+ const td=ds(T),tm=ds(ad(T,1)),yd=ds(ad(T,-1)),h=sum(td,tm,om),k=sum(yd,td,om);
+ const mi=sum(mo(0),mo(1),lb),mp=sum(mo(-1),mo(0),lb);
+ const tr=D().filter(t=>t.tgl>=mo(0)&&t.tgl<mo(1)),trp=D().filter(t=>t.tgl>=mo(-1)&&t.tgl<mo(0)).length;
+ const lw=stok.filter(s=>s.q>0&&s.q<=2).length,ha=stok.filter(s=>s.q<=0).length;
+ $("st").innerHTML=cd("Penjualan Hari Ini",rp(h),dl(h,k,"kemarin"),h>=k?"up":"dn")+cd("Transaksi Bulan Ini",tr.length,dl(tr.length,trp,"bln lalu"))+cd("Laba Bersih Bulan Ini",rp(mi),dl(mi,mp,"bln lalu"),mi>=0?"up":"dn")+cd("Stok Menipis",lw+ha,`<span class="${lw+ha?"dn":"up"} sm">${ha} habis</span>`,lw+ha?"dn":"up");
+ chart();
+ const ok=stok.filter(s=>s.q>2).length;
+ $("ss").innerHTML=stok.length?`<div class="row"><span>Aman</span><b class="up">${ok}</b></div><div class="row"><span>Menipis</span><b style="color:#ffb020">${lw}</b></div><div class="row"><span>Habis</span><b class="dn">${ha}</b></div>`:'<div class="em">Isi tab Stok dulu</div>';
+ const P={};tr.forEach(t=>P[t.prd]=(P[t.prd]||0)+t.qty);
+ const tp=Object.entries(P).sort((a,b)=>b[1]-a[1]).slice(0,3);
+ $("tp").innerHTML=tp.length?tp.map((p,i)=>`<div class="row"><span>${i+1}. ${esc(p[0])}</span><b>${p[1]} pcs</b></div>`).join(""):'<div class="em">Belum ada data</div>';
+ const L=[...D()].sort((a,b)=>b.tgl.localeCompare(a.tgl)||b.id-a.id);
+ $("rc").innerHTML=L.length?L.slice(0,5).map(t=>`<div class="row"><span>${esc(t.prd)} <span class="bd">${esc(t.toko||t.plt)}</span></span><span>${rp(om(t))} <b class="${lb(t)>=0?"up":"dn"} sm">${lb(t)>=0?"+":""}${rp(lb(t))}</b></span></div>`).join(""):'<div class="em">Belum ada transaksi. Tekan + Transaksi</div>';
+ $("tb").innerHTML=L.length?L.map(t=>`<tr><td>${t.tgl.slice(5)}</td><td>${esc(t.prd)}</td><td>${esc(t.toko||t.plt)}</td><td class="r">${t.qty}</td><td class="r">${rp(om(t))}</td><td class="r ${lb(t)>=0?"up":"dn"}">${rp(lb(t))}</td><td><button class="x" data-id="${t.id}">×</button></td></tr>`).join(""):'<tr><td colspan="7" class="em">Kosong</td></tr>';
+ $("stb").innerHTML=stok.length?stok.map((s,i)=>`<tr><td>${esc(s.n)}</td><td class="r ${s.q<=2?"dn":""}">${s.q}</td><td class="r">${rp(s.m)}</td><td><button class="x" data-i="${i}">×</button></td></tr>`).join(""):'<tr><td colspan="4" class="em">Belum ada stok</td></tr>';
+ $("dl").innerHTML=stok.map(s=>`<option value="${esc(s.n)}">`).join("")
+ const ops=toko.map(k=>`<option value="${esc(k.n)}">${esc(k.n)}</option>`).join("");
+ $("ct").innerHTML='<option value="">Semua toko</option>'+ops;$("ct").value=cur;
+ $("plt").innerHTML=ops||'<option value="">(tambah toko dulu)</option>';
+ $("kl").innerHTML=toko.length?toko.map((k,i)=>`<div class="row"><span>${esc(k.n)} <span class="bd">${k.p}</span></span><button class="x" data-i="${i}">×</button></div>`).join(""):'<div class="em">Belum ada toko</div>'}
+
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("on",x==b));document.querySelectorAll(".sec").forEach(s=>s.classList.toggle("on",s.id==b.dataset.t))});
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{mode=b.dataset.m;document.querySelectorAll("#seg button").forEach(x=>x.classList.toggle("on",x==b));chart()});
+$("new").onclick=()=>{$("tgl").value=ds(T);$("mod").style.display="block"};
+$("cl").onclick=()=>$("mod").style.display="none";
+$("prd").onchange=()=>{const s=fs($("prd").value);if(s&&s.m&&!$("hm").value)$("hm").value=s.m};
+$("add").onclick=()=>{const prd=$("prd").value.trim(),qty=+$("qty").value,hj=+$("hj").value;
+ if(!prd||!qty||!hj||!$("tgl").value||!$("plt").value){alert("Isi toko, tanggal, produk, qty, dan harga jual.");return}
+ data.push({id:Date.now(),tgl:$("tgl").value,prd,toko:$("plt").value,plt:(toko.find(k=>k.n===$("plt").value)||{}).p||"",qty,hj,hm:+$("hm").value||0,bya:+$("bya").value||0});
+ const s=fs(prd);if(s)s.q=Math.max(0,s.q-qty);
+ post([row(data[data.length-1])]);sv();["prd","hj","hm","bya"].forEach(i=>$(i).value="");$("qty").value=1;$("mod").style.display="none";R()};
+$("tb").onclick=e=>{const id=e.target.dataset.id;if(id&&confirm("Hapus transaksi ini?")){data=data.filter(d=>d.id!=id);sv();R()}};
+$("sa").onclick=()=>{const n=$("sp").value.trim();if(!n||$("sq").value===""){alert("Isi nama produk dan stok.");return}
+ const s=fs(n),q=+$("sq").value,m=+$("sm").value||0;if(s){s.q=q;if(m)s.m=m}else stok.push({n,q,m});
+ sv();["sp","sq","sm"].forEach(i=>$(i).value="");R()};
+$("stb").onclick=e=>{const i=e.target.dataset.i;if(i!==undefined&&confirm("Hapus dari stok?")){stok.splice(i,1);sv();R()}};
+$("csv").onclick=()=>{const r=[["Tanggal","Produk","Platform","Qty","Harga Jual","Modal","Biaya","Laba"],...data.map(t=>[t.tgl,'"'+t.prd.replace(/"/g,'""')+'"',t.plt,t.qty,t.hj,t.hm,t.bya,lb(t)])];
+ const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(r.map(x=>x.join(",")).join("\n"));a.download="rekap-toko.csv";a.click()};
+$("ct").onchange=()=>{cur=$("ct").value;R()};
+$("ka").onclick=()=>{const n=$("kn").value.trim();if(!n)return;if(toko.some(k=>k.n.toLowerCase()===n.toLowerCase())){alert("Nama toko sudah ada.");return}toko.push({n,p:$("kp").value});sv();$("kn").value="";R()};
+$("kl").onclick=e=>{const i=e.target.dataset.i;if(i!==undefined&&confirm("Hapus toko? Transaksi lama tetap tersimpan.")){if(cur===toko[i].n)cur="";toko.splice(i,1);sv();R()}};
+const row=t=>[t.id,t.tgl,t.toko||"",t.plt,t.prd,t.qty,t.hj,t.hm,t.bya,om(t),lb(t)];
+const post=async rows=>{if(!SU)return"Isi URL Web App dulu.";try{await fetch(SU,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({rows})});return"Terkirim "+rows.length+" baris. Cek sheet-nya."}catch(e){return"Gagal kirim: "+e.message}};
+$("sus").onclick=()=>{SU=$("su").value.trim();try{localStorage.setItem("rekap_sheet_url",SU)}catch(e){}$("sx").textContent=SU?"URL tersimpan.":"URL dikosongkan."};
+$("sua").onclick=async()=>{$("sx").textContent="Mengirim...";$("sx").textContent=await post(data.map(row))};
+$("su").value=SU;
+R();
+</script></body></html>
